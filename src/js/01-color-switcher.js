@@ -3,39 +3,49 @@ const colorStopButton = document.querySelector('button[data-stop]');
 const colorChangeTime = 1000;
 let timerId = null;
 
-function inactiveStartButton() {
+//funkcja dajaca wartosc losowa koloru
+function getRandomHexColor() {
+  return `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+}
+//style inline do wartosci losowej koloru body
+function bodyColor() {
+  document.body.style.backgroundColor = getRandomHexColor();
+}
+//klikniecie przyciskiem start
+colorStartButton.addEventListener('click', e => {
+  timerId = setInterval(bodyColor, colorChangeTime);
+  console.log(timerId);
+  e.target.setAttribute('disabled', true);
+  colorStopButton.removeAttribute('disabled');
+});
+//klikniecie przyciskiem stop
+colorStopButton.addEventListener('click', e => {
+  e.target.setAttribute('disabled', true);
+  colorStartButton.removeAttribute('disabled');
+  clearInterval(timerId);
+  console.log(`Interval with id ${timerId} has stopped!`);
+});
+
+/*function inactiveStartButton() {
   colorStartButton.setAttribute(disabled, true);
 }
+
 function activeStartButton() {
   colorStartButton.setAttribute(disabled, false);
+  timerId = null;
 }
+
 function checkingStartButton() {
-  if (getRandomHexColor === colorStartButton) {
+  if ((timerId = true)) {
+    // if (getRandomHexColor === colorStartButton) {
     return inactiveStartButton();
     {
     }
     return activeStartButton();
   }
 }
+//
 
-function getRandomHexColor() {
-  return `#${Math.floor(Math.random() * 16777215).toString(16)}`;
-}
-
-colorStartButton.addEventListener('click', () => {
-  timerId = setInterval(bodyColor, colorChangeTime);
-  console.log(timerId);
-});
-
-colorStopButton.addEventListener('click', () => {
-  clearInterval(timerId);
-  console.log(`Interval with id ${timerId} has stopped!`);
-  timerId = null;
-});
-
-function bodyColor() {
-  document.body.style.backgroundColor = getRandomHexColor();
-}
 /*<button type="button" data-start>Start</button>
 <button type="button" data-stop>Stop</button>
 

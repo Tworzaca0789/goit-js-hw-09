@@ -3,31 +3,69 @@ import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
 const dateTimePicker = document.querySelector('#datetime-picker');
-const startBtn = document.querySelector('button[data-start]');
-const dataDays = document.querySelector('span[data-days]');
-const dataHours = document.querySelector('span[data-hours]');
-const dataMinutes = document.querySelector('span[data-minutes]');
-const dataSeconds = document.querySelector('span[data-seconds]');
-const valueData = document.querySelectorAll('.value');
+const startBtn = document.querySelector('[data-start]');
+const dataDays = document.querySelector('[data-days]');
+const dataHours = document.querySelector('[data-hours]');
+const dataMinutes = document.querySelector('[data-minutes]');
+const dataSeconds = document.querySelector('[data-seconds]');
+const valueDataSpan = document.querySelectorAll('.value');
 const labelSpan = document.querySelectorAll('.label');
+const field = document.querySelectorAll('.field');
+const timer = document.querySelector('.timer');
 const TIME_CALCULATION = 1000;
+let timerId = 0;
+
 const options = {
-  enableTime: true, //Włącza selektor czasu
-  time_24hr: true, //Wyświetla selektor czasu w trybie 24-godzinnym bez wyboru AM/PM, jeśli jest włączony.
-  defaultDate: new Date() /*Ustawia początkowo wybrane daty.
-
-  Jeśli używasz mode: "multiple"kalendarza zakresu, dostarczaj Arrayobiekty Datelub tablicę ciągów dat, które podążają za twoim dateFormat.
-  
-  W przeciwnym razie możesz podać pojedynczy obiekt Date lub ciąg daty.*/,
-  minuteIncrement: 1, //Reguluje krok wprowadzania minut (w tym przewijanie)
-
-  onClose(selectedDates) {
-    console.log(selectedDates[0]);
+  enableTime: true,
+  time_24hr: true,
+  defaultDate: new Date(),
+  minuteIncrement: 1,
+  onClose: selectedDates => {
+    console.log(selectedDates[0].getTime());
+    console.log(Date.now());
+    dateFlatPicker(selectedDates);
   },
 };
-//flatpickr(element, {options});
-flatpickr(dateTimePicker, { options });
 
+flatpickr(dateTimePicker, { ...options });
+
+startBtn.disabled = true;
+
+function dateFlatPicker(selectedDates) {
+  if (selectedDates[0].getTime() < Date.now()) {
+    alert('Please choose a date in the future', {
+      clickToClose: true,
+      timeout: 10000,
+    });
+    startBtn.disabled = true;
+  } else {
+    startBtn.disabled = false;
+  }
+}
+//flatpickr(element, {options});
+
+startBtn.addEventListener('click', () => {
+  startBtn.disabled = true;
+  dateTimePicker.disabled = true;
+
+  timerId = setInterval(() => {
+    const startingDate = new Date(dateTimePicker.value);
+    const endDate = startingDate - Date.now();
+    const { days, hours, minutes, seconds } = convertMs(endDate);
+    dataDays.textContent = addLeadingZero(days);
+    dataHours.textContent = addLeadingZero(hours);
+    dataMinutes.textContent = addLeadingZero(minutes);
+    dataSeconds.textContent = addLeadingZero(seconds);
+
+    if (endDate <= TIME_CALCULATION) {
+      clearInterval(timerId);
+      dateTimePicker.disabled = false;
+    }
+  }, TIME_CALCULATION);
+});
+function addLeadingZero(value) {
+  return String(value).padStart(2, '0');
+}
 function convertMs(ms) {
   // Number of milliseconds per unit of time
   const second = 1000;
@@ -47,13 +85,8 @@ function convertMs(ms) {
   return { days, hours, minutes, seconds };
 }
 
-console.log(convertMs(2000)); // {days: 0, hours: 0, minutes: 0, seconds: 2}
-console.log(convertMs(140000)); // {days: 0, hours: 0, minutes: 2, seconds: 20}
-console.log(convertMs(24140000)); // {days: 0, hours: 6 minutes: 42, seconds: 20}
+//const preciseTeamMeetingDate = new Date('')
 
-//const preciseTeamMeetingDate = new Date('March 16, 2030 14:25:00');
-//console.log(preciseTeamMeetingDate);
-// "Mon Mar 16 2030 14:25:00 GMT+0200 (Eastern European Standard Time)"
 /*onClose: function(selectedDates, dateStr, instance){
        // ...
     }
